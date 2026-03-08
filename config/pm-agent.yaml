@@ -1,0 +1,584 @@
+# PM Agent 配置示例
+# 版本: 1.0.0
+# 最后更新: 2026-03-07
+
+version: "1.0"
+kind: "AgentConfig"
+metadata:
+  name: "pm-agent-config"
+  namespace: "clawfleet"
+  labels:
+    app: "pm-agent"
+    role: "product-manager"
+    version: "1.0.0"
+
+# ==========================================
+# 智能体身份配置
+# ==========================================
+identity:
+  # 基本信息
+  id: "agent_pm_001"
+  name: "PM Agent"
+  displayName: "产品经理智能体"
+  role: "Product Manager"
+  version: "1.0.0"
+  status: "production"             # development, staging, production, deprecated
+
+  # 描述信息
+  description: "负责需求分析、PRD生成和任务拆解的产品经理智能体"
+  longDescription: |
+    PM Agent 是一个专业的产品管理智能体，具备完整的需求分析和产品规划能力。
+    它能够与用户进行深入沟通，理解业务需求，生成高质量的产品需求文档（PRD），
+    并将需求拆解为可执行的开发任务。通过与其他智能体协作，PM Agent 确保产品
+    从概念到交付的全流程管理。
+
+  # 核心能力
+  capabilities:
+    - id: "requirement_analysis"
+      name: "需求分析"
+      description: "深度理解和分析用户需求，识别关键要素和潜在风险"
+      level: "expert"              # basic, intermediate, advanced, expert
+
+    - id: "user_communication"
+      name: "用户沟通"
+      description: "与用户进行有效沟通，澄清需求细节和解决歧义"
+      level: "expert"
+
+    - id: "prd_generation"
+      name: "PRD 生成"
+      description: "生成结构化、标准化的产品需求文档"
+      level: "expert"
+
+    - id: "task_decomposition"
+      name: "任务拆解"
+      description: "将需求拆解为 Epic、Feature 等可执行任务"
+      level: "advanced"
+
+    - id: "iteration_planning"
+      name: "迭代规划"
+      description: "规划产品迭代周期和里程碑"
+      level: "advanced"
+
+    - id: "risk_assessment"
+      name: "风险评估"
+      description: "识别和评估项目风险，提出应对措施"
+      level: "intermediate"
+
+  # 专业领域
+  domains:
+    - "Software Development"
+    - "Product Management"
+    - "Agile Methodology"
+    - "Requirements Engineering"
+    - "Stakeholder Management"
+
+  # 支持的语言
+  languages:
+    primary: "zh-CN"               # 主要语言
+    supported:
+      - "zh-CN"                    # 简体中文
+      - "en-US"                    # 英语
+      - "zh-TW"                    # 繁体中文
+
+  # 元数据
+  metadata:
+    creator: "ClawFleet Team"
+    maintainer: "pm-team@clawfleet.ai"
+    license: "Apache-2.0"
+    tags:
+      - "product-management"
+      - "requirements"
+      - "planning"
+      - "documentation"
+    category: "management"
+    subcategory: "product"
+
+  # 联系信息
+  contact:
+    email: "pm-agent@clawfleet.ai"
+    documentation: "https://docs.clawfleet.ai/agents/pm"
+    support: "https://support.clawfleet.ai"
+    repository: "https://github.com/clawfleet/pm-agent"
+
+  # 行为特征
+  personality:
+    tone: "professional"           # professional, casual, friendly, formal
+    style: "structured"            # structured, creative, analytical, collaborative
+    communicationPreference: "clear_and_concise"
+    decisionMaking: "data_driven"  # data_driven, intuitive, collaborative
+
+  # 工作模式
+  workMode:
+    autonomous: true               # 是否支持自主运行
+    requiresApproval: true         # 是否需要人工审批
+    interactiveMode: true          # 是否支持交互模式
+    batchProcessing: false         # 是否支持批处理
+
+  # 协作设置
+  collaboration:
+    # 可以协作的智能体
+    collaborators:
+      - agentId: "agent_arch_001"
+        role: "Architect"
+        relationship: "peer"       # peer, supervisor, subordinate
+
+      - agentId: "agent_dev_001"
+        role: "Developer"
+        relationship: "peer"
+
+      - agentId: "agent_test_001"
+        role: "Tester"
+        relationship: "peer"
+
+    # 协作协议
+    protocols:
+      - "rest_api"
+      - "message_queue"
+      - "webhook"
+
+    # 通信偏好
+    communicationChannels:
+      - type: "synchronous"
+        priority: "high"
+        methods: ["api_call", "webhook"]
+
+      - type: "asynchronous"
+        priority: "medium"
+        methods: ["message_queue", "email"]
+
+  # 性能特征
+  performance:
+    expectedResponseTime: "2s"     # 期望响应时间
+    maxConcurrentTasks: 5          # 最大并发任务数
+    throughput: "10 PRDs/hour"     # 吞吐量
+    availability: "99.5%"          # 可用性目标
+
+  # 限制与约束
+  limitations:
+    - "不支持实时语音交互"
+    - "PRD 生成最大长度为 10000 字"
+    - "单次任务拆解不超过 50 个任务"
+    - "需求澄清最多迭代 10 轮"
+
+  # 依赖项
+  dependencies:
+    required:
+      - service: "openai"
+        version: ">=1.0.0"
+        purpose: "LLM 推理"
+
+      - service: "notion"
+        version: ">=2.0.0"
+        purpose: "文档存储"
+
+    optional:
+      - service: "github"
+        version: ">=3.0.0"
+        purpose: "任务管理"
+
+      - service: "slack"
+        version: ">=1.0.0"
+        purpose: "通知服务"
+
+  # 版本兼容性
+  compatibility:
+    minOpenClawVersion: "2.0.0"
+    maxOpenClawVersion: "3.0.0"
+    apiVersion: "v1"
+
+  # 生命周期
+  lifecycle:
+    createdAt: "2026-01-15T00:00:00Z"
+    updatedAt: "2026-03-07T00:00:00Z"
+    deprecationDate: null
+    retirementDate: null
+
+  # 审计与合规
+  compliance:
+    dataRetention: "90d"           # 数据保留期
+    gdprCompliant: true            # GDPR 合规
+    hipaaCompliant: false          # HIPAA 合规
+    auditLogging: true             # 审计日志
+
+  # 安全设置
+  security:
+    authenticationRequired: true
+    authorizationLevel: "standard"  # basic, standard, strict
+    dataEncryption: true
+    sensitiveDataHandling: "mask"   # mask, encrypt, exclude
+
+# ==========================================
+# LLM 模型配置
+# ==========================================
+llm:
+  provider: "openai"              # 可选: openai, anthropic, azure, local
+  model: "gpt-4o"                 # 模型名称
+  apiKey: "${OPENAI_API_KEY}"     # API 密钥（从环境变量读取）
+  baseUrl: "https://api.openai.com/v1"
+  temperature: 0.7                # 温度参数 (0-1)，越高越有创造性
+  maxTokens: 4096                 # 每次请求的最大 token 数
+  contextWindow: 128000           # 上下文窗口大小
+  timeout: 60                     # 超时时间（秒）
+  retryAttempts: 3                # 失败重试次数
+  rateLimiting:
+    requestsPerMinute: 60         # 每分钟请求限制
+    tokensPerMinute: 90000        # 每分钟 token 限制
+
+# ==========================================
+# Skills 技能配置
+# ==========================================
+skills:
+  enabled:
+    # 需求分析技能
+    - name: "requirement_analyzer"
+      version: "1.0.0"
+      config:
+        analysisDepth: "detailed"  # simple, detailed, comprehensive
+        extractKeywords: true
+        identifyStakeholders: true
+
+    # PRD 生成技能
+    - name: "prd_generator"
+      version: "1.0.0"
+      config:
+        template: "standard"       # standard, agile, lean
+        includeRiskAssessment: true
+        includeTechnicalConstraints: true
+        autoVersioning: true
+
+    # 任务拆解技能
+    - name: "task_decomposer"
+      version: "1.0.0"
+      config:
+        granularity: "medium"      # small, medium, large
+        maxTasksPerEpic: 10
+        estimateEffort: true
+        assignPriority: true
+
+    # Notion 集成技能
+    - name: "notion_integration"
+      version: "1.0.0"
+      config:
+        apiKey: "${NOTION_API_KEY}"
+        databaseId: "${NOTION_DATABASE_ID}"
+        autoSync: true
+        syncInterval: "5m"
+
+# ==========================================
+# Memory 记忆持久化配置
+# ==========================================
+memory:
+  backend: "vector"                # 可选: local, redis, vector, postgres
+
+  # 向量存储配置
+  vectorStore:
+    provider: "pinecone"           # pinecone, weaviate, chroma, milvus
+    apiKey: "${PINECONE_API_KEY}"
+    environment: "production"
+    indexName: "pm-agent-memory"
+    dimension: 1536                # 向量维度
+    metric: "cosine"               # 距离度量: cosine, euclidean, dotproduct
+
+  # 数据保留策略
+  retention:
+    conversations: "30d"           # 对话记忆保留 30 天
+    documents: "365d"              # 文档记忆保留 1 年
+    tasks: "180d"                  # 任务记忆保留 6 个月
+    analytics: "90d"               # 分析数据保留 3 个月
+
+  # 隔离级别配置
+  isolation:
+    level: "workspace"             # user, project, workspace, global
+    allowCrossReference: false     # 是否允许跨工作空间引用
+    sharedMemoryEnabled: true      # 是否启用共享记忆池
+
+# ==========================================
+# Workspace 工作空间配置
+# ==========================================
+workspace:
+  id: "ws_pm_001"
+  name: "产品管理工作空间"
+  projectId: "proj_clawfleet_001"
+  description: "ClawFleet 产品管理和开发协作空间"
+
+  # 团队成员
+  team:
+    - role: "pm"
+      agentId: "agent_pm_001"
+      permissions: ["read", "write", "approve"]
+
+    - role: "architect"
+      agentId: "agent_arch_001"
+      permissions: ["read", "comment"]
+
+    - role: "developer"
+      agentId: "agent_dev_001"
+      permissions: ["read", "implement"]
+
+    - role: "tester"
+      agentId: "agent_test_001"
+      permissions: ["read", "test"]
+
+# ==========================================
+# Communication 通讯配置
+# ==========================================
+communication:
+  channels:
+    # WhatsApp 集成
+    - type: "whatsapp"
+      enabled: true
+      config:
+        apiKey: "${WHATSAPP_API_KEY}"
+        phoneNumberId: "${WHATSAPP_PHONE_ID}"
+        webhookUrl: "https://your-domain.com/webhook/whatsapp"
+        verifyToken: "${WHATSAPP_VERIFY_TOKEN}"
+
+    # Email 集成
+    - type: "email"
+      enabled: true
+      config:
+        smtp:
+          host: "smtp.gmail.com"
+          port: 587
+          secure: false              # true for 465, false for other ports
+          username: "${EMAIL_USERNAME}"
+          password: "${EMAIL_PASSWORD}"
+        from:
+          name: "PM Agent"
+          address: "pm-agent@your-domain.com"
+
+    # Slack 集成
+    - type: "slack"
+      enabled: false
+      config:
+        botToken: "${SLACK_BOT_TOKEN}"
+        signingSecret: "${SLACK_SIGNING_SECRET}"
+        appToken: "${SLACK_APP_TOKEN}"
+        socketMode: true
+
+# ==========================================
+# Document Platform 文档平台配置
+# ==========================================
+documentPlatform:
+  primary: "notion"                # 主要文档平台
+
+  # Notion 配置
+  notion:
+    apiKey: "${NOTION_API_KEY}"
+    workspaceId: "${NOTION_WORKSPACE_ID}"
+    databases:
+      prd: "${NOTION_PRD_DATABASE_ID}"
+      tasks: "${NOTION_TASKS_DATABASE_ID}"
+      meetings: "${NOTION_MEETINGS_DATABASE_ID}"
+    autoCreatePages: true
+    templateId: "prd_template_v1"
+    syncOnChange: true
+
+  # 飞书配置（可选）
+  feishu:
+    enabled: false
+    appId: "${FEISHU_APP_ID}"
+    appSecret: "${FEISHU_APP_SECRET}"
+    tenantAccessToken: "${FEISHU_TENANT_TOKEN}"
+
+  # Confluence 配置（可选）
+  confluence:
+    enabled: false
+    baseUrl: "${CONFLUENCE_BASE_URL}"
+    username: "${CONFLUENCE_USERNAME}"
+    apiToken: "${CONFLUENCE_API_TOKEN}"
+    spaceKey: "PM"
+
+# ==========================================
+# Task Management 任务管理配置
+# ==========================================
+taskManagement:
+  provider: "github"              # github, jira, linear
+
+  # GitHub 配置
+  github:
+    token: "${GITHUB_TOKEN}"
+    repository: "your-org/clawfleet"
+    projectId: 123
+    labels:
+      epic: "type:epic"
+      feature: "type:feature"
+      bug: "type:bug"
+      priority_high: "priority:high"
+      priority_medium: "priority:medium"
+      priority_low: "priority:low"
+    autoAssign: true
+    defaultAssignee: "pm-agent"
+
+  # Jira 配置（可选）
+  jira:
+    enabled: false
+    baseUrl: "${JIRA_BASE_URL}"
+    email: "${JIRA_EMAIL}"
+    apiToken: "${JIRA_API_TOKEN}"
+    projectKey: "CLAW"
+    issueTypes:
+      epic: "Epic"
+      story: "Story"
+      task: "Task"
+
+# ==========================================
+# Observability 可观测性配置
+# ==========================================
+observability:
+  # 日志配置
+  logging:
+    level: "info"                 # debug, info, warn, error
+    format: "json"                # json, text
+    destination: "stdout"         # stdout, file, cloudwatch
+    includePrompts: true          # 是否记录 prompt 内容
+    includeResponses: true        # 是否记录 LLM 响应
+    sensitiveDataMasking: true    # 是否脱敏敏感数据
+
+  # 追踪配置
+  tracing:
+    enabled: true
+    provider: "opentelemetry"     # opentelemetry, datadog, jaeger
+    endpoint: "http://localhost:4318"
+    protocol: "grpc"              # grpc, http
+    sampleRate: 0.1               # 采样率 (0-1)
+
+  # 指标配置
+  metrics:
+    enabled: true
+    provider: "prometheus"        # prometheus, datadog, cloudwatch
+    port: 9090
+    endpoint: "/metrics"
+    customMetrics:
+      - name: "prd_generation_time"
+        type: "histogram"
+        unit: "seconds"
+      - name: "task_decomposition_count"
+        type: "counter"
+      - name: "user_clarification_rounds"
+        type: "gauge"
+      - name: "approval_rate"
+        type: "gauge"
+
+# ==========================================
+# Resource Limits 资源限制配置
+# ==========================================
+resources:
+  # 计算资源
+  compute:
+    cpu: "1000m"                  # CPU 限制（毫核）
+    memory: "2Gi"                 # 内存限制
+    gpu: "0"                      # GPU 数量
+    ephemeralStorage: "10Gi"      # 临时存储限制
+
+  # 并发控制
+  concurrency:
+    maxParallelTasks: 5           # 最大并发任务数
+    maxQueueSize: 100             # 最大队列长度
+    queueTimeout: "1h"            # 队列超时时间
+
+  # 预算控制
+  budget:
+    monthlyLimit: 1000            # 月度预算（美元）
+    dailyLimit: 50                # 日度预算（美元）
+    alertThreshold: 0.8           # 告警阈值（80%）
+    autoStopOnLimit: false        # 超限是否自动停止
+
+  # 超时配置
+  timeout:
+    prdGeneration: 300            # PRD 生成超时（秒）
+    taskDecomposition: 180        # 任务拆解超时（秒）
+    userClarification: 3600       # 用户澄清超时（秒）
+    defaultOperation: 120         # 默认操作超时（秒）
+
+# ==========================================
+# Security 安全配置
+# ==========================================
+security:
+  # 认证配置
+  authentication:
+    method: "oauth2"              # oauth2, api_key, jwt
+    tokenExpiry: "24h"            # token 过期时间
+    refreshEnabled: true          # 是否支持刷新 token
+
+  # 加密配置
+  encryption:
+    atRest: true                  # 静态数据加密
+    inTransit: true               # 传输数据加密
+    algorithm: "AES-256-GCM"      # 加密算法
+
+  # 密钥管理
+  secrets:
+    provider: "env"               # env, vault, aws_secrets_manager, azure_keyvault
+    autoRotation: false           # 是否自动轮换密钥
+    rotationPeriod: "90d"         # 轮换周期
+    vaultConfig:                  # 如果使用 Vault
+      address: "${VAULT_ADDR}"
+      token: "${VAULT_TOKEN}"
+      path: "secret/clawfleet"
+
+  # 访问控制
+  accessControl:
+    rbacEnabled: true             # 是否启用 RBAC
+    allowedIPs: []                # IP 白名单（空表示允许所有）
+    rateLimiting:
+      enabled: true
+      requestsPerMinute: 100
+      burstSize: 20
+
+# ==========================================
+# Workflow Parameters 工作流参数
+# ==========================================
+parameters:
+  # 任务拆解参数
+  taskGranularity: "medium"       # small, medium, large
+  maxIterations: 5                # 最大澄清迭代次数
+
+  # 自动化配置
+  autoSave: true                  # 是否自动保存 PRD
+  autoNotify: true                # 是否自动通知
+  autoCreateTasks: true           # 是否自动创建任务
+
+  # 通知配置
+  notificationEnabled: true
+  notificationChannels:
+    - "whatsapp"
+    - "email"
+
+  # 文档配置
+  documentPlatform: "notion"
+  documentAutoSync: true
+  documentVersioning: true
+
+  # 质量控制
+  requireApproval: true           # 是否需要用户审批
+  minApprovers: 1                 # 最少审批人数
+  allowSelfApproval: false        # 是否允许自我审批
+
+# ==========================================
+# Feature Flags 功能开关
+# ==========================================
+features:
+  enableAIReview: true            # 启用 AI 辅助审阅
+  enableAutoEstimation: true      # 启用自动工作量估算
+  enableRiskAnalysis: true        # 启用风险分析
+  enableImpactAnalysis: false     # 启用影响分析（实验性）
+  enableMultiLanguage: false      # 启用多语言支持（开发中）
+  enableAdvancedMetrics: true     # 启用高级指标
+
+# ==========================================
+# Experimental 实验性功能
+# ==========================================
+experimental:
+  enableQuantumComputing: false   # 量子计算支持（未来）
+  enableFederatedLearning: false  # 联邦学习（研究中）
+  enableAutoPromptOptimization: true  # 自动 Prompt 优化
+
+---
+# 配置说明：
+# 1. 所有 ${VAR_NAME} 格式的值都会从环境变量中读取
+# 2. 敏感信息（API Keys, Tokens）请务必使用环境变量，不要硬编码
+# 3. 建议创建 .env 文件来管理环境变量
+# 4. 使用前请确保所有必需的环境变量都已正确配置
+# 5. 可以根据实际需求调整各项参数
+

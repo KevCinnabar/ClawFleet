@@ -44,6 +44,9 @@ ClawFleet 是一个致力于**学习和交流智能体工作流**的开放平台
 
 - **design/** - 架构设计与技术文档
   - `DevelopmentFleet.md` - 开发规划与智能体设计
+  - `PMFlow.md` - PM 智能体工作流设计
+  - `PMFlow-Diagrams.md` - 工作流程图（Mermaid）
+  - `QuickStart.md` - 快速启动指南
   
 - **integration/** - 第三方服务集成指南
   - `notion.md` - Notion API 集成配置
@@ -52,7 +55,16 @@ ClawFleet 是一个致力于**学习和交流智能体工作流**的开放平台
 - **questions/** - 常见问题与讨论
   - `questions.md` - 社区提出的问题与思考
 
+- **config/** - 配置文件
+  - `pm-agent.yaml` - PM Agent 完整配置示例
+
 ## 快速开始
+
+### 🤖 了解智能体规范
+查看 [智能体规范文档](./AGENTS.md) 了解所有智能体的定义、配置和使用方法。
+
+### 🚀 5 分钟快速上手
+查看 [快速启动指南](./design/QuickStart.md) 了解如何快速部署和运行 PM Agent。
 
 ### 了解基础概念
 阅读 [设计文档](./design/DevelopmentFleet.md) 了解智能体工作流的设计原理。
