@@ -24,7 +24,7 @@ graph TB
     style Approve fill:#D0021B,color:#fff
 ```
 
-## 详细流程图：用户审批通过
+## 详细流程图：完整工作流程
 
 ```mermaid
 graph TD
@@ -42,37 +42,26 @@ graph TD
     K --> L[锁定本迭代范围]
     L --> M[通知开发团队]
     M --> N[流程结束]
+    I -->|不通过| O[用户提出修改意见]
+    O --> P[记录反馈到 PRD]
+    P --> B
     
     style A fill:#e1f5ff
     style F fill:#fff4e1
     style I fill:#ffe1e1
     style J fill:#e1ffe1
+    style O fill:#ffd4d4
+    style P fill:#ffebcc
     style N fill:#f0f0f0
 ```
 
-## 详细流程图：用户审批不通过
-
-```mermaid
-graph TD
-    A[用户提出需求] --> B[PM 分析需求]
-    B --> C{需求是否清晰?}
-    C -->|否| D[PM 向用户提问]
-    D --> E[用户澄清需求]
-    E --> B
-    C -->|是| F[PM 生成 PRD]
-    F --> G[保存至文档平台]
-    G --> H[提交用户确认]
-    H --> I{用户审批}
-    I -->|不通过| J[用户提出修改意见]
-    J --> K[记录反馈到 PRD]
-    K --> B
-    
-    style A fill:#e1f5ff
-    style F fill:#fff4e1
-    style I fill:#ffe1e1
-    style J fill:#ffd4d4
-    style K fill:#ffebcc
-```
+**说明**：
+- 🔵 浅蓝色：流程起点（用户提出需求）
+- 🟡 浅黄色：关键生成节点（PRD 生成）
+- 🔴 浅红色：决策节点（用户审批）
+- 🟢 浅绿色：审批通过路径（创建任务）
+- 🟠 橙色：审批不通过路径（修改意见、记录反馈）
+- ⚪ 灰色：流程结束
 
 ## 时序图：PM 与用户交互
 
@@ -267,4 +256,5 @@ graph LR
 
 **创建日期**：2026年3月7日  
 **版本**：v1.0
+
 
