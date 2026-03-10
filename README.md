@@ -31,32 +31,54 @@
 
 ## 项目内容结构
 
-- **design/** - 架构设计与技术文档
-  - `DevelopmentFleet.md` - 开发规划与智能体设计
-  - `PMFlow.md` - PM 智能体工作流设计
-  - `PMFlow-Diagrams.md` - 工作流程图（Mermaid）
-  - `QuickStart.md` - 快速启动指南
-  
-- **integration/** - 第三方服务集成指南
-  - `notion.md` - Notion API 集成配置
-  - `whatsapp.md` - WhatsApp 集成配置
-  
-- **questions/** - 常见问题与讨论
-  - `questions.md` - 社区提出的问题与思考
+- **AGENTS.md** - 智能体注册和规范文档
+- **QUICKSTART.md** - 5分钟快速启动指南
+- **CONTRIBUTING.md** - 贡献指南
 
-- **config/** - 配置文件
-  - `pm-agent.yaml` - PM Agent 完整配置示例
+- **doc/** - 文档目录
+  - **design/** - 架构设计与技术文档
+    - `DevelopmentFleet.md` - 开发规划与智能体设计
+    - `PMFlow.md` - PM 智能体工作流设计
+    - `PMFlow-Diagrams.md` - 工作流程图（Mermaid）
+  - **integration/** - 第三方服务集成指南
+    - `notion.md` - Notion API 集成配置
+    - `whatsapp.md` - WhatsApp 集成配置
+    - `github.md` - GitHub 集成配置
+  - **questions/** - 常见问题与讨论
+    - `questions.md` - 社区提出的问题与思考
+  - `OPENCLAW_CONFIG.md` - OpenClaw 配置文件说明
+
+- **agents/** - 智能体实现
+  - **manager/** - Manager Agent（产品经理）
+  - **developer/** - Developer Agent（开发者）
+  - **config/** - 配置模板
+    - `pm-agent.yaml` - PM Agent 完整配置示例
+
+- **data/** - 智能体数据存储
+  - **agents/** - 各智能体的运行时数据
+    - **manager/** - Manager Agent 数据
+      - `IDENTITY.md` - 身份定义
+      - `SOUL.md` - 价值观和行为准则
+      - `agent.yaml` - 运行时配置
+    - **developer/** - Developer Agent 数据
+      - `IDENTITY.md` - 身份定义
+      - `SOUL.md` - 价值观和行为准则
+      - `agent.yaml` - 运行时配置
+  - **workspace/** - 共享工作空间
 
 ## 快速开始
 
 ### 🤖 了解智能体规范
 查看 [智能体规范文档](./AGENTS.md) 了解所有智能体的定义、配置和使用方法。
 
+### ⚙️ 理解 OpenClaw 配置
+阅读 [OpenClaw 配置说明](./doc/OPENCLAW_CONFIG.md) 了解 IDENTITY.md 和 SOUL.md 的作用。
+
 ### 🚀 5 分钟快速上手
-查看 [快速启动指南](doc/design/QuickStart.md) 了解如何快速部署和运行 PM Agent。
+查看 [快速启动指南](./QUICKSTART.md) 了解如何快速部署和运行智能体。
 
 ### 了解基础概念
-阅读 [设计文档](doc/design/DevelopmentFleet.md) 了解智能体工作流的设计原理。
+阅读 [设计文档](./doc/design/DevelopmentFleet.md) 了解智能体工作流的设计原理。
 
 ### 配置集成服务
 按照集成指南配置所需的第三方服务：
