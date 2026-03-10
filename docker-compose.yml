@@ -1,0 +1,19 @@
+services:
+  managers:
+    build:
+      context: ./managers
+    container_name: claw-manager
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file:
+      - ./.env
+      - ./managers/config/manager.env
+    volumes:
+      - ./data/managers:/data
+    networks:
+      - fleet-net
+
+networks:
+  fleet-net:
+    driver: bridge
