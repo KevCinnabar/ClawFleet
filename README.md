@@ -53,18 +53,18 @@
 查看 [智能体规范文档](./AGENTS.md) 了解所有智能体的定义、配置和使用方法。
 
 ### 🚀 5 分钟快速上手
-查看 [快速启动指南](./design/QuickStart.md) 了解如何快速部署和运行 PM Agent。
+查看 [快速启动指南](doc/design/QuickStart.md) 了解如何快速部署和运行 PM Agent。
 
 ### 了解基础概念
-阅读 [设计文档](./design/DevelopmentFleet.md) 了解智能体工作流的设计原理。
+阅读 [设计文档](doc/design/DevelopmentFleet.md) 了解智能体工作流的设计原理。
 
 ### 配置集成服务
 按照集成指南配置所需的第三方服务：
-- [Notion 集成](./integration/notion.md)
-- [WhatsApp 集成](./integration/whatsapp.md)
+- [Notion 集成](doc/integration/notion.md)
+- [WhatsApp 集成](doc/integration/whatsapp.md)
 
 ### 参与讨论
-查阅 [常见问题](./questions/questions.md)，提出你的想法和问题。
+查阅 [常见问题](doc/questions/questions.md)，提出你的想法和问题。
 
 ## 学习资源推荐
 

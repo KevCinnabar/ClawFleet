@@ -23,4 +23,4 @@ WORKDIR /DATA
 
 EXPOSE 3000
 
-CMD ["openclaw", "gateway", "start", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["openclaw", "gateway", "start", "--host", "0.0.0.0", "--port", "3000", "--config", "/data/agents/developer/agent.yaml"]
