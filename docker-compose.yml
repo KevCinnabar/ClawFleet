@@ -8,9 +8,10 @@ services:
       - "3001:3000"
     env_file:
       - ./.env
-      - agents/manager/config/manager.env
     volumes:
-      - ./data/managers:/data
+      - ./data/.openclaw/manager:/data/.openclaw
+      - ./data/workspace:/data/workspace
+      - ./data/agents/manager:/data/agents/manager
     networks:
       - fleet-net
 
@@ -20,12 +21,13 @@ services:
     container_name: claw-developer
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3002:3000"
     env_file:
       - ./.env
-      - agents/manager/config/developer.env
     volumes:
-      - ./data/developer:/data
+      - ./data/.openclaw/developer:/data/.openclaw
+      - ./data/workspace:/data/workspace
+      - ./data/agents/developer:/data/agents/developer
     command: >
       openclaw gateway start
       --config /data/agents/developer/agent.yaml

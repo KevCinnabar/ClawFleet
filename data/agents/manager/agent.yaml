@@ -1,0 +1,27 @@
+# Manager Agent runtime config
+agent:
+  id: manager-001
+  name: Manager Agent
+  displayName: 产品经理智能体
+  role: manager
+  version: "1.0.0"
+  status: active
+
+llm:
+  provider: openai
+  model: ${OPENAI_MODEL:-gpt-4o}
+  temperature: 0.4
+  maxTokens: 4096
+
+integrations:
+  notion:
+    enabled: true
+  github:
+    enabled: true
+  slack:
+    enabled: true
+
+workflow:
+  maxRetries: 3
+  timeout: 3600
+

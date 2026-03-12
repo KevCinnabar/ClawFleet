@@ -1,8 +1,8 @@
 FROM ghcr.io/openclaw/openclaw:latest
 
-ENV NODE_ENV = production
-ENV OPENCLAW_HOME = /data/.openclaw
-ENV OPENCLAW_WORKSPACE = /data/workspace
+ENV NODE_ENV=production
+ENV OPENCLAW_HOME=/data/.openclaw
+ENV OPENCLAW_WORKSPACE=/data/workspace
 
 USER root
 
@@ -15,11 +15,11 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /data/ .openclaw /data/workspace && \
-    chown -R node:node /data \
+RUN mkdir -p /data/.openclaw /data/workspace /data/agents/manager && \
+    chown -R node:node /data
 
 USER node
-WORKDIR /DATA
+WORKDIR /data
 
 EXPOSE 3000
 
