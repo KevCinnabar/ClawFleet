@@ -28,9 +28,6 @@ services:
       - ./data/.openclaw/developer:/data/.openclaw
       - ./data/workspace:/data/workspace
       - ./data/agents/developer:/data/agents/developer
-    command: >
-      openclaw gateway start
-      --config /data/agents/developer/agent.yaml
     networks:
       - fleet-net
 

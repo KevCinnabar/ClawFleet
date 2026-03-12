@@ -3,6 +3,7 @@ FROM ghcr.io/openclaw/openclaw:latest
 ENV NODE_ENV=production
 ENV OPENCLAW_HOME=/data/.openclaw
 ENV OPENCLAW_WORKSPACE=/data/workspace
+ENV OPENCLAW_NO_RESPAWN=1
 
 USER root
 
@@ -18,9 +19,12 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /data/.openclaw /data/workspace /data/agents/developer && \
     chown -R node:node /data
 
+COPY --chown=node:node entrypoint.sh /data/entrypoint.sh
+RUN chmod +x /data/entrypoint.sh
+
 USER node
 WORKDIR /data
 
 EXPOSE 3000
 
-CMD ["openclaw", "gateway", "start", "--host", "0.0.0.0", "--port", "3000", "--config", "/data/agents/developer/agent.yaml"]
+ENTRYPOINT ["/data/entrypoint.sh"]
