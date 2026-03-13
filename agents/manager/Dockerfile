@@ -8,9 +8,6 @@ RUN apt-get update && apt-get install -y \
 
 USER node
 
-# 预写 gateway 配置：允许非 loopback 的 Control UI
-RUN openclaw config set gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback true
-
 COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
 
 EXPOSE 18789
