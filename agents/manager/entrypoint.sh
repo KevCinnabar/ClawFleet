@@ -1,21 +1,23 @@
-#!/bin/sh
-set -e
+#!/bin/bash
+# entrypoint.sh — 启动 Gateway 并自动审批所有待配对设备
 
-CONFIG_DIR="$OPENCLAW_HOME/.openclaw"
-CONFIG_FILE="$CONFIG_DIR/openclaw.json"
+# 后台循环：每 3 秒检查并自动审批所有 pending 设备
+auto_approve() {
+  sleep 5  # 等待 gateway 启动
+  while true; do
+    # 获取所有 pending request ID 并逐一审批
+    openclaw devices list 2>/dev/null \
+      | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' \
+      | while read -r rid; do
+          openclaw devices approve "$rid" 2>/dev/null && \
+            echo "[auto-approve] approved device $rid"
+        done
+    sleep 3
+  done
+}
 
-# Initialize config if not present (first run with empty volume)
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "[entrypoint] First run: initializing OpenClaw config..."
-  openclaw doctor --fix 2>/dev/null || true
-  openclaw config set gateway.mode local
-  openclaw config set gateway.bind lan
-  openclaw config set gateway.port 3000
-  openclaw config set gateway.auth.mode token
-  openclaw config set gateway.controlUi.allowedOrigins '["http://localhost:3000","http://127.0.0.1:3000","http://localhost:3001","http://127.0.0.1:3001"]'
-  echo "[entrypoint] Config initialized."
-fi
+auto_approve &
 
-# Start gateway with token from env
-exec openclaw gateway run --port 3000 --bind lan --token "$OPENCLAW_GATEWAY_TOKEN"
+# 前台启动 gateway（PID 1，接收信号）
+exec openclaw gateway run --port 18789 --bind lan --allow-unconfigured "$@"
 

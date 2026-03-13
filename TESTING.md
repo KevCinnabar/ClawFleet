@@ -1,35 +1,60 @@
 # ClawFleet 测试与验证指南
 
+> 基于 [OpenClaw Docker 文档](https://docs.openclaw.ai/install/docker) 和本项目实际配置编写。
+
+## 为什么不用 `docker-setup.sh`？
+
+OpenClaw 官方仓库提供了 `docker-setup.sh` 一键脚本，它会自动完成镜像构建、onboarding、token 生成和 Compose 启动等步骤。**这是官方推荐的最简启动方式。**
+
+但 ClawFleet 是一个**独立的编排项目**，不是从 OpenClaw 仓库根目录运行的，因此无法直接使用 `docker-setup.sh`。本项目的做法是：
+
+| 对比项 | `docker-setup.sh`（官方） | ClawFleet（本项目） |
+|--------|--------------------------|-------------------|
+| 运行位置 | OpenClaw 仓库根目录 | 独立项目目录 |
+| 镜像来源 | 本地 build 或 `OPENCLAW_IMAGE` 拉取 | 直接 `FROM ghcr.io/openclaw/openclaw:latest` |
+| Onboarding | 脚本自动运行 `onboard` 向导 | 通过 `--allow-unconfigured` 跳过 |
+| Token 管理 | 脚本自动生成并写入 `.env` | 手动在 `.env` 中配置 `OPENCLAW_GATEWAY_TOKEN` |
+| 容器数量 | 单个 gateway | 多个智能体（Manager + Developer），各自独立容器 |
+| 配置注入 | 脚本自动处理 | 通过 volume 挂载 `data/agents/` 中的 IDENTITY.md、SOUL.md |
+
+> 💡 如果你只想快速体验单个 OpenClaw 实例，建议直接使用官方的 `docker-setup.sh`。
+> ClawFleet 的价值在于**多智能体编排**——每个角色一个容器，各自独立的身份和数据。
+
+详见：[OpenClaw Docker 文档解读](./doc/openclaw-docker.md)
+
+---
+
+## 架构概览
+
+```
+宿主机 (macOS)
+├── docker-compose.yml
+├── .env                          ← API Key + Gateway Token
+├── agents/
+│   ├── manager/Dockerfile        ← FROM ghcr.io/openclaw/openclaw:latest
+│   └── developer/Dockerfile
+└── data/                         ← volume 挂载（运行时持久化）
+    ├── .openclaw/manager/        → 容器内 /home/node/.openclaw
+    ├── .openclaw/developer/      → 容器内 /home/node/.openclaw
+    ├── agents/manager/           → 容器内 /home/node/.openclaw/agents/manager
+    ├── agents/developer/         → 容器内 /home/node/.openclaw/agents/developer
+    └── workspace/                → 容器内 /home/node/.openclaw/workspace
+
+端口映射：
+  Manager:   宿主机 3001 → 容器 18789
+  Developer: 宿主机 3002 → 容器 18789
+```
+
+---
+
 ## 前置条件
 
 | 条件 | 验证命令 | 期望结果 |
 |------|---------|---------|
-| Docker CLI | `docker --version` | `>= 29.x`，API `>= 1.44` |
+| Docker CLI | `docker --version` | `>= 27.x`，API `>= 1.44` |
 | Docker Compose | `docker compose version` | `>= 2.x` |
 | Colima（macOS） | `colima status` | `Running` |
 | .env 文件 | `test -f .env && echo OK` | `OK` |
-
----
-
-## ⚠️ 关键说明
-
-### OpenClaw Gateway 是 WebSocket 服务
-
-Gateway 监听的是 **WebSocket 协议**（`ws://`），不是 HTTP REST API。
-`curl http://localhost:3001` 不会返回正常结果，这是**预期行为**。
-
-### OpenClaw 配置路径
-
-OpenClaw 的实际配置路径是 `$OPENCLAW_HOME/.openclaw/openclaw.json`。
-
-由于 Dockerfile 设置了 `ENV OPENCLAW_HOME=/data/.openclaw`，容器内的配置文件路径为：
-```
-/data/.openclaw/.openclaw/openclaw.json
-```
-
-当前 Dockerfile 在构建时已通过 `openclaw doctor --fix` 和 `openclaw config set` 将配置烘焙进镜像，**无需手动初始化**。
-
-运行时修改会通过 volume 持久化到宿主机的 `data/.openclaw/` 目录。
 
 ---
 
@@ -44,25 +69,13 @@ docker version
 # Colima 状态（macOS 用户）
 colima status
 
-# .env 存在且非空
-wc -l .env
+# .env 存在且包含必要配置
+grep OPENCLAW_GATEWAY_TOKEN .env
+grep OPENAI_API_KEY .env
 
 # data 目录结构
 find data -type f | sort
 ```
-
-**预期 data 目录结构：**
-```
-data/agents/developer/IDENTITY.md
-data/agents/developer/SOUL.md
-data/agents/developer/agent.yaml
-data/agents/manager/IDENTITY.md
-data/agents/manager/SOUL.md
-data/agents/manager/agent.yaml
-data/workspace/.gitkeep
-```
-
-> 注意：`data/.openclaw/` 下的运行时配置由镜像自动生成，首次启动前可以为空。
 
 ---
 
@@ -70,22 +83,21 @@ data/workspace/.gitkeep
 
 ```bash
 docker compose build manager
-docker compose build developer
 ```
 
-**✅ 成功：** 输出末尾显示 `Successfully built`
+**✅ 成功：** 输出末尾显示类似 `Successfully built` 或 `Image built`
 
-**❌ 失败排查：**
+**❌ 常见错误：**
 
 | 错误 | 原因 | 解决 |
 |------|------|------|
 | `client version too old` | Docker CLI 版本太低 | `brew reinstall docker` |
 | `requires buildx 0.17.0` | buildx 插件太旧 | `brew install docker-buildx` |
-| `pull access denied` | 无法拉取基础镜像 | 检查网络 / `docker login` |
+| `pull access denied` | 无法拉取基础镜像 | 检查网络 / `docker login ghcr.io` |
 
 ---
 
-## 第 3 步：启动 Manager（单独测试）
+## 第 3 步：启动 Manager
 
 ```bash
 docker compose up manager -d
@@ -95,7 +107,7 @@ docker compose logs -f manager
 
 **✅ 成功标志（日志中出现）：**
 ```
-[gateway] listening on ws://0.0.0.0:3000 (PID ...)
+[gateway] listening on ws://0.0.0.0:18789 (PID ...)
 [heartbeat] started
 [health-monitor] started
 ```
@@ -104,212 +116,143 @@ docker compose logs -f manager
 
 | 日志中的错误 | 原因 | 解决 |
 |-------------|------|------|
-| `Missing config. Run openclaw setup` | 镜像构建时初始化失败 | 重新 `docker compose build manager` |
-| `unknown option '--host'` | CMD 参数错误 | Dockerfile CMD 应为 `gateway run --port 3000 --bind lan` |
-| `unknown option '--config'` | CMD 参数错误 | 同上，OpenClaw gateway 不支持 --config |
+| `Refusing to bind gateway to lan without auth` | Token 未注入 | 确认 `.env` 中有 `OPENCLAW_GATEWAY_TOKEN=...` |
+| `Missing config` | 缺少 `--allow-unconfigured` | 检查 Dockerfile CMD 是否包含该参数 |
+| `non-loopback Control UI requires allowedOrigins` | `--bind lan` 要求 CORS 配置 | 见下方「controlUi 配置」 |
 | `EADDRINUSE` | 端口被占用 | `lsof -i :3001` 并 kill 占用进程 |
-| `non-loopback Control UI requires...` | 首次启动自动修复 | OpenClaw 会自动写入 `allowedOrigins`，等待重启 |
+
+#### controlUi 配置（`--bind lan` 必须）
+
+`--bind lan` 让 Gateway 绑定 `0.0.0.0`，OpenClaw 要求此时配置 Canvas UI 的 CORS 来源。
+
+修复方式：在**宿主机** `data/.openclaw/<agent>/openclaw.json` 中加入：
+
+```json
+{
+  "gateway": {
+    "controlUi": {
+      "dangerouslyAllowHostHeaderOriginFallback": true
+    }
+  }
+}
+```
+
+> ⚠️ **Volume 覆盖陷阱**：Dockerfile 中 `RUN openclaw config set ...` 写入的配置在 `~/.openclaw/openclaw.json`，
+> 但 docker-compose 的 volume 挂载 `./data/.openclaw/manager:/home/node/.openclaw` 会**完全覆盖**容器内该目录。
+> 因此必须在**宿主机的 `data/.openclaw/manager/openclaw.json`** 中写入配置，而非仅在 Dockerfile 中设置。
 
 ---
 
-## 第 4 步：验证 Manager 服务
+## 第 4 步：验证服务
 
-Gateway 使用固定 token 认证（在 `.env` 中配置 `OPENCLAW_GATEWAY_TOKEN=clawfleet-dev-token-2026`）。
+### 4.1 健康检查
 
-### 4.1 浏览器访问 Canvas UI
+```bash
+curl -fsS http://localhost:3001/healthz && echo " ✅ healthy"
+curl -fsS http://localhost:3001/readyz  && echo " ✅ ready"
+```
+
+### 4.2 浏览器访问 Canvas UI
+
+在浏览器打开：
+
 ```
 http://localhost:3001/#token=clawfleet-dev-token-2026
 ```
 
-### 4.2 容器内 CLI 检查（不需要 token）
+> **注意**：token 通过 `#token=`（hash fragment）传递，不是 `?token=`。
+> hash fragment 不会发送到服务器日志，更安全。
+
+### 4.3 设备配对（自动审批）
+
+OpenClaw 有**两层认证**：① Token 验证 ② 设备配对审批。
+
+本项目通过 `entrypoint.sh` 实现**自动审批**——后台每 3 秒扫描 pending 设备并自动批准。
+首次打开 Canvas UI 时可能需要等待几秒后刷新页面。
+
+如需手动审批（调试用）：
+
+```bash
+docker exec claw-manager openclaw devices list
+docker exec claw-manager openclaw devices approve <requestId>
+```
+
+
+### 4.4 容器内 CLI 检查
+
 ```bash
 docker exec -it claw-manager openclaw health
-docker exec -it claw-manager openclaw gateway status
 ```
 
-### 4.3 WebSocket 连接测试
+### 4.5 查看 Gateway 日志
+
 ```bash
-brew install websocat
-websocat "ws://localhost:3001?token=clawfleet-dev-token-2026"
+docker exec claw-manager cat /tmp/openclaw/openclaw-$(date +%Y-%m-%d).log
 ```
-
-**✅ 成功标志：**
-- 浏览器能打开 Canvas 对话界面
-- `openclaw health` 返回健康状态
-- WebSocket 能建立连接
-
-**❌ 常见错误：**
-
-| 错误 | 原因 | 解决 |
-|------|------|------|
-| `{"error":"Unauthorized"}` | token 不对或 URL 格式错 | 用 `#token=` 不是 `?token=` |
-| `Refusing to bind gateway to lan without auth` | 环境变量未注入 | `docker compose config` 检查 |
-| `Connection refused` | Gateway 未运行 | `docker compose up manager -d` |
 
 ---
 
-## 第 5 步：启动 Developer（单独测试）
+## 第 5 步：启动 Developer（可选）
 
 ```bash
-docker compose up developer -d
-docker compose ps
+docker compose up developer --build -d
 docker compose logs -f developer
 
 # 验证
-docker exec -it claw-developer openclaw health
+curl -fsS http://localhost:3002/healthz && echo " ✅ healthy"
 ```
 
-浏览器访问 Developer Canvas：
-```
-http://localhost:3002/#token=clawfleet-dev-token-2026
-```
+Canvas UI 地址：`http://localhost:3002/#token=clawfleet-dev-token-2026`
 
 ---
 
-## 第 6 步：全部启动
+## 全部启动与停止
 
 ```bash
-docker compose up -d
+# 启动所有服务
+docker compose up --build -d
+
+# 查看状态
 docker compose ps
+
+# 查看所有日志
 docker compose logs -f
-```
 
-**✅ 预期结果：**
-```
-NAME             STATUS    PORTS
-claw-manager     Up        0.0.0.0:3001->3000/tcp
-claw-developer   Up        0.0.0.0:3002->3000/tcp
-```
-
-**✅ 服务访问：**
-
-| 服务 | WebSocket | Canvas UI |
-|------|-----------|-----------|
-| Manager | `ws://localhost:3001` | `http://localhost:3001/#token=clawfleet-dev-token-2026` |
-| Developer | `ws://localhost:3002` | `http://localhost:3002/#token=clawfleet-dev-token-2026` |
-
----
-
-## 第 7 步：进入容器调试
-
-```bash
-# 进入 manager 容器
-docker exec -it claw-manager sh
-
-# 容器内检查
-ls /data/.openclaw/.openclaw/     # 应有 openclaw.json
-ls /data/agents/manager/          # 应有 agent.yaml, IDENTITY.md, SOUL.md
-cat /data/.openclaw/.openclaw/openclaw.json
-env | grep OPENAI                 # 检查环境变量是否注入
-openclaw --version
-openclaw health
-openclaw gateway status
-
-# 退出
-exit
-```
-
----
-
-## 第 8 步：停止和清理
-
-```bash
-# 停止所有
+# 停止所有服务
 docker compose down
 
-# 停止单个
-docker compose stop manager
-
-# 停止并删除镜像（重新构建时）
-docker compose down --rmi all
+# 停止并删除 volume（清除数据）
+docker compose down -v
 ```
 
 ---
 
-## 常见问题速查表
+## 排错速查表
 
-| 现象 | 可能原因 | 解决 |
-|------|---------|------|
-| 容器一直 Restarting | `openclaw.json` 缺失或格式错 | 重新 `docker compose build --no-cache manager` |
-| `client version too old` | Docker CLI 版本低 | `brew reinstall docker` |
-| `requires buildx 0.17.0` | buildx 太旧 | `brew install docker-buildx` |
-| `unknown option` | Dockerfile CMD 参数错误 | CMD 应为 `gateway run --port 3000 --bind lan` |
-| 端口冲突 | 3001 或 3002 被占用 | `lsof -i :3001` |
-| `.env` 不生效 | 格式错误或路径错 | `docker compose config` 查看解析结果 |
-| `curl http://localhost:3001` 无响应 | Gateway 是 WebSocket 不是 HTTP | 用 `websocat ws://localhost:3001` 或浏览器访问 `/__openclaw__/canvas/` |
-| `{"error":"Unauthorized"}` | `.env` 中缺少 `OPENCLAW_GATEWAY_TOKEN` 或 URL 格式错 | URL 用 `http://localhost:3001/#token=clawfleet-dev-token-2026`（注意是 `#` 不是 `?`） |
-| `non-loopback Control UI requires...` | 首次 bind=lan 需要 allowedOrigins | OpenClaw 自动修复，等容器自动重启即可 |
-
----
-
-## 配置文件清单
-
-```
-ClawFleet/
-├── .env                                       ← 环境变量（密钥，不提交 git）
-├── docker-compose.yml                         ← 服务编排
-├── agents/                                    ← 构建目录（只有 Dockerfile）
-│   ├── manager/Dockerfile
-│   └── developer/Dockerfile
-└── data/                                      ← 运行时数据（volume 挂载）
-    ├── .openclaw/                             ← OpenClaw 运行时状态（由镜像自动生成）
-    │   ├── manager/.openclaw/openclaw.json
-    │   └── developer/.openclaw/openclaw.json
-    ├── agents/                                ← Agent 身份和配置
-    │   ├── manager/
-    │   │   ├── agent.yaml
-    │   │   ├── IDENTITY.md
-    │   │   └── SOUL.md
-    │   └── developer/
-    │       ├── agent.yaml
-    │       ├── IDENTITY.md
-    │       └── SOUL.md
-    └── workspace/.gitkeep                     ← 共享工作空间
-```
+| 现象 | 排查命令 | 常见原因 |
+|------|---------|---------|
+| `docker.sock: no such file` | `colima status` | Colima 未运行，执行 `colima start` |
+| 容器反复 restart | `docker compose logs manager` | 缺少 token 或缺少 `--allow-unconfigured` |
+| `non-loopback Control UI requires...` | 检查 `data/.openclaw/*/openclaw.json` | 缺少 `gateway.controlUi` 配置，见第 3 步说明 |
+| `Unauthorized` | 检查 URL 是否用了 `#token=` | 用了 `?token=` 会被服务器拒绝 |
+| `device needs pairing approval` | `docker exec claw-manager openclaw devices list` | 新设备首次连接需审批，见第 4.3 步 |
+| 无法访问 3001 | `docker compose ps` | 容器未启动或端口未映射 |
+| 镜像拉取失败 | `docker pull ghcr.io/openclaw/openclaw:latest` | 网络问题 |
+| healthcheck 失败 | `docker exec claw-manager curl http://127.0.0.1:18789/healthz` | Gateway 未完全启动 |
 
 ---
 
-## 快速验证脚本
+## OpenClaw Gateway 通信说明
 
-```bash
-cd ~/ClawFleet
+OpenClaw Gateway 使用 **WebSocket (ws://)** 协议进行智能体通信，同时在同一端口上提供 HTTP 端点：
 
-echo "=== 必需文件检查 ==="
-for f in \
-  .env \
-  docker-compose.yml \
-  agents/manager/Dockerfile \
-  agents/developer/Dockerfile \
-  data/agents/manager/agent.yaml \
-  data/agents/manager/IDENTITY.md \
-  data/agents/manager/SOUL.md \
-  data/agents/developer/agent.yaml \
-  data/agents/developer/IDENTITY.md \
-  data/agents/developer/SOUL.md \
-; do
-  if [ -f "$f" ] && [ -s "$f" ]; then
-    echo "✅ $f"
-  else
-    echo "❌ $f (缺失或为空)"
-  fi
-done
+| 端点 | 协议 | 用途 | 是否需要 auth |
+|------|------|------|-------------|
+| `/healthz` | HTTP GET | 健康检查 | 否 |
+| `/readyz` | HTTP GET | 就绪检查 | 否 |
+| `/#token=...` | HTTP (Canvas UI) | 浏览器交互界面 | 是（通过 hash） |
+| `ws://...` | WebSocket | 智能体通信 | 是（token） |
 
-echo ""
-echo "=== Dockerfile CMD 检查 ==="
-grep "CMD" agents/manager/Dockerfile
-grep "CMD" agents/developer/Dockerfile
+---
 
-echo ""
-echo "=== 容器状态 ==="
-docker compose ps 2>/dev/null || echo "❌ Docker Compose 不可用"
-
-echo ""
-echo "=== 端口检查 ==="
-lsof -i :3001 -sTCP:LISTEN > /dev/null 2>&1 && echo "✅ 3001 有服务监听" || echo "⚠️  3001 无服务"
-lsof -i :3002 -sTCP:LISTEN > /dev/null 2>&1 && echo "✅ 3002 有服务监听" || echo "⚠️  3002 无服务"
-
-echo ""
-echo "=== Gateway 健康检查 ==="
-docker exec claw-manager openclaw health 2>/dev/null || echo "⚠️  Manager 未运行"
-docker exec claw-developer openclaw health 2>/dev/null || echo "⚠️  Developer 未运行"
-```
+**最后更新**: 2026年3月13日

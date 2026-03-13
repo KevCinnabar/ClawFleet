@@ -1,128 +1,102 @@
-# ClawFleet -
+# ClawFleet
 
-## 智能体流（Agent Flow）的定义
+> 通过学习和实践智能体工作流（Agentic Workflow），构建多智能体协作系统。
 
-### 什么是智能体流？
+## 项目目标
 
-**智能体流（Agent Flow）**是一种系统设计范式，用于描述多个智能体（Agents）之间的协作、交互和任务执行的过程。
+学习和交流**智能体工作流（Agentic Workflow）**的核心概念与实践方法，通过搭建一个最小可用的多智能体开发团队（Manager + Developer），掌握：
+
+- 智能体的身份定义（Identity）与行为准则（Soul）
+- 多智能体之间的任务流转与协作机制
+- 基于 Docker 的智能体部署与运行
+
+## 智能体流（Agentic Workflow）
+
+### 定义
+
+**智能体流（Agentic Workflow）** 是一种系统设计范式：通过编排多个具备独立决策能力的智能体（Agent），让它们按照预定义的流程相互协作、自我纠正，共同完成复杂任务。
 
 ### 核心特征
 
-1. **分布式决策** - 每个智能体具有独立的决策能力
-2. **协作执行** - 智能体之间通过消息传递和状态共享进行协作
-3. **工作流编排** - 定义了任务流转、依赖关系和执行顺序
-4. **动态适应** - 能够根据环境和条件动态调整执行策略
-5. **可观测性** - 提供完整的执行日志和状态跟踪
+1. **分布式决策** — 每个智能体具有独立的判断和执行能力
+2. **协作执行** — 智能体之间通过消息传递进行协作
+3. **工作流编排** — 定义任务流转、依赖关系和执行顺序
+4. **动态适应** — 根据环境和反馈动态调整执行策略
 
-### 工作流的三个关键层次
+### 吴恩达教授的观点
+
+> "I think AI agentic workflows will drive massive AI progress this year — perhaps even more than the next generation of foundation models."
+>
+> — Andrew Ng, 2024
+
+吴恩达教授指出，智能体工作流是 AI 的新范式。它不仅仅是单个模型的能力问题，而是如何通过系统化的流程设计，让智能体能够相互协作、自我纠正和不断优化。
+
+📺 **推荐视频**：[What's next for AI agentic workflows - Andrew Ng](https://www.youtube.com/watch?v=sal78ACtGTc)
+
+## 项目结构
 
 ```
-┌─────────────────────────────────────┐
-│   智能体层（Agent Layer）           │
-│   - 单个智能体的行为与能力          │
-├─────────────────────────────────────┤
-│   交互层（Interaction Layer）       │
-│   - 智能体间的通信与协议            │
-├─────────────────────────────────────┤
-│   流程层（Flow Layer）              │
-│   - 整体工作流的编排与执行          │
-└─────────────────────────────────────┘
+ClawFleet/
+├── docker-compose.yml          # 多容器编排
+├── .env.example                # 环境变量模板
+├── TESTING.md                  # 测试与验证指南
+├── agents/                     # Dockerfile 定义
+│   ├── manager/Dockerfile
+│   └── developer/Dockerfile
+├── data/                       # 运行时数据（volume 挂载）
+│   ├── agents/
+│   │   ├── manager/            # Manager 的 IDENTITY.md / SOUL.md / agent.yaml
+│   │   └── developer/          # Developer 的 IDENTITY.md / SOUL.md / agent.yaml
+│   └── workspace/              # 共享工作空间
+└── doc/                        # 设计与参考文档
+    ├── design/                 # 架构设计
+    ├── integration/            # 第三方集成指南
+    └── questions/              # 问题讨论
 ```
-
-## 项目内容结构
-
-- **AGENTS.md** - 智能体注册和规范文档
-- **QUICKSTART.md** - 5分钟快速启动指南
-- **CONTRIBUTING.md** - 贡献指南
-
-- **doc/** - 文档目录
-  - **design/** - 架构设计与技术文档
-    - `DevelopmentFleet.md` - 开发规划与智能体设计
-    - `PMFlow.md` - PM 智能体工作流设计
-    - `PMFlow-Diagrams.md` - 工作流程图（Mermaid）
-  - **integration/** - 第三方服务集成指南
-    - `notion.md` - Notion API 集成配置
-    - `whatsapp.md` - WhatsApp 集成配置
-    - `github.md` - GitHub 集成配置
-  - **questions/** - 常见问题与讨论
-    - `questions.md` - 社区提出的问题与思考
-  - `OPENCLAW_CONFIG.md` - OpenClaw 配置文件说明
-
-- **agents/** - 智能体实现
-  - **manager/** - Manager Agent（产品经理）
-  - **developer/** - Developer Agent（开发者）
-  - **config/** - 配置模板
-    - `pm-agent.yaml` - PM Agent 完整配置示例
-
-- **data/** - 智能体数据存储
-  - **agents/** - 各智能体的运行时数据
-    - **manager/** - Manager Agent 数据
-      - `IDENTITY.md` - 身份定义
-      - `SOUL.md` - 价值观和行为准则
-      - `agent.yaml` - 运行时配置
-    - **developer/** - Developer Agent 数据
-      - `IDENTITY.md` - 身份定义
-      - `SOUL.md` - 价值观和行为准则
-      - `agent.yaml` - 运行时配置
-  - **workspace/** - 共享工作空间
 
 ## 快速开始
 
-### 🤖 了解智能体规范
-查看 [智能体规范文档](./AGENTS.md) 了解所有智能体的定义、配置和使用方法。
+```bash
+# 1. 克隆项目
+git clone <repo-url> && cd ClawFleet
 
-### ⚙️ 理解 OpenClaw 配置
-阅读 [OpenClaw 配置说明](./doc/OPENCLAW_CONFIG.md) 了解 IDENTITY.md 和 SOUL.md 的作用。
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env，填入 OPENAI_API_KEY 和 OPENCLAW_GATEWAY_TOKEN
 
-### 🚀 5 分钟快速上手
-查看 [快速启动指南](./QUICKSTART.md) 了解如何快速部署和运行智能体。
+# 3. 启动 Manager
+docker compose up manager --build -d
 
-### 了解基础概念
-阅读 [设计文档](./doc/design/DevelopmentFleet.md) 了解智能体工作流的设计原理。
+# 4. 查看日志
+docker compose logs -f manager
 
-### 配置集成服务
-按照集成指南配置所需的第三方服务：
-- [Notion 集成](doc/integration/notion.md)
-- [WhatsApp 集成](doc/integration/whatsapp.md)
+# 5. 验证服务
+curl -fsS http://localhost:3001/healthz && echo " ✅ healthy"
 
-### 参与讨论
-查阅 [常见问题](doc/questions/questions.md)，提出你的想法和问题。
+# 6. 打开 Canvas UI
+open "http://localhost:3001/#token=clawfleet-dev-token-2026"
+```
 
-## 学习资源推荐
+详细测试步骤请参阅 [TESTING.md](./TESTING.md)。
 
-### 视频教程
+## 文档索引
 
-#### 吴恩达教授 - 智能体流系列
+| 文档 | 说明 |
+|------|------|
+| [TESTING.md](./TESTING.md) | 测试与验证指南 |
+| [DevelopmentFleet.md](./doc/design/DevelopmentFleet.md) | 开发团队设计与工作流 |
+| [PMFlow.md](./doc/design/PMFlow.md) | PM 智能体工作流设计 |
+| [PMFlow-Diagrams.md](./doc/design/PMFlow-Diagrams.md) | 工作流程图（Mermaid） |
+| [proposal_1.md](./doc/proposal_1.md) | 项目提案 |
+| [openclaw-docker.md](./doc/openclaw-docker.md) | OpenClaw Docker 文档解读 |
+| [notion.md](./doc/integration/notion.md) | Notion 集成配置 |
+| [github.md](./doc/integration/github.md) | GitHub 集成配置 |
 
-- **[Building Agentic Reasoning Systems](https://www.deeplearning.ai/short-courses/building-agentic-reasoning-systems/)** - DeepLearning.AI 短课程
-  - 深度探讨智能体流的架构设计
-  - 实践指南：如何构建可靠的代理系统
-  - 适合初学者到进阶开发者
+## 学习资源
 
-- **[AI Agents in Production](https://www.youtube.com/results?search_query=andrew+ng+ai+agents)** - 生产环境中的 AI 智能体
-  - 讨论智能体在实际应用中的挑战与解决方案
-  - 系统设计最佳实践
-
-### 推荐阅读
-- 智能体设计模式与最佳实践
-- 工作流编排的实现方法
-- 多智能体系统的协调机制
-- Andrew Ng 的最新论文与技术博客
-
-### 核心理念
-
-正如吴恩达教授所指出的：
-> "智能体流是 AI 的新范式。它不仅仅是单个模型的能力问题，而是如何通过系统化的流程设计，让智能体能够相互协作、自我纠正和不断优化。"
-
-我们坚信，通过深入学习、积极交流和不断实践，可以逐步掌握智能体工作流的精髓，构建更加智能、高效的自动化系统。
-
-## 贡献指南
-
-欢迎参与 ClawFleet 项目的建设！你可以：
-- 📝 提交问题和建议
-- 🔄 分享实践经验
-- 📚 完善文档
-- 💡 提出创新想法
+- 📺 [What's next for AI agentic workflows - Andrew Ng](https://www.youtube.com/watch?v=sal78ACtGTc)
+- 📺 [Building Agentic RAG with LlamaIndex - DeepLearning.AI](https://www.deeplearning.ai/short-courses/)
+- 📖 [OpenClaw 官方文档](https://docs.openclaw.ai)
 
 ## 许可证
 
@@ -130,10 +104,6 @@
 
 ---
 
-**最后更新**: 2026年3月7日
+**最后更新**: 2026年3月12日
 
 *学习无止境，流动不停息。让我们一起探索智能体工作流的无限可能！*
-
-
-
-
