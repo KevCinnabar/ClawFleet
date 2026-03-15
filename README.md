@@ -33,6 +33,41 @@
 
 📺 **推荐视频**：[What's next for AI agentic workflows - Andrew Ng](https://www.youtube.com/watch?v=sal78ACtGTc)
 
+## PM 智能体工作流
+
+以下是 Manager Agent 的完整工作流程，包含用户审批通过和不通过两条路径：
+
+```mermaid
+flowchart TD
+    A([用户提出需求]) --> B[PM 分析需求]
+    B --> C{需求是否清晰?}
+    C -->|否| D[PM 向用户提问]
+    D --> E[用户澄清需求]
+    E --> B
+    C -->|是| F[PM 生成 PRD]
+    F --> G[保存至文档平台]
+    G --> H[提交用户确认]
+    H --> I{用户审批}
+
+    I -->|✅ 通过| J[创建任务]
+    J --> K[任务拆解为 Epic/Feature]
+    K --> L[锁定本迭代范围]
+    L --> M[通知 Developer Agent]
+    M --> N([进入开发阶段])
+
+    I -->|❌ 不通过| O[用户提出修改意见]
+    O --> P[记录反馈到 PRD]
+    P --> B
+
+    style A fill:#E3F2FD,stroke:#1E88E5
+    style N fill:#E8F5E9,stroke:#43A047
+    style F fill:#FFF3E0,stroke:#FB8C00
+    style I fill:#FCE4EC,stroke:#D81B60
+    style J fill:#E8F5E9,stroke:#43A047
+    style O fill:#FFCDD2,stroke:#E53935
+    style P fill:#FFECB3,stroke:#FFA000
+```
+
 ## 项目结构
 
 ```
@@ -40,14 +75,21 @@ ClawFleet/
 ├── docker-compose.yml          # 多容器编排
 ├── .env.example                # 环境变量模板
 ├── TESTING.md                  # 测试与验证指南
-├── agents/                     # Dockerfile 定义
-│   ├── manager/Dockerfile
-│   └── developer/Dockerfile
+├── agents/                     # 容器定义 + 独立环境变量
+│   ├── manager/
+│   │   ├── Dockerfile          # Manager 镜像
+│   │   ├── entrypoint.sh       # 两阶段初始化脚本
+│   │   └── .env                # Manager 专属环境变量（git ignored）
+│   └── developer/
+│       ├── Dockerfile
+│       ├── entrypoint.sh
+│       └── .env                # Developer 专属环境变量（git ignored）
 ├── data/                       # 运行时数据（volume 挂载）
+│   ├── .openclaw/              # OpenClaw 运行时配置（git ignored）
 │   ├── agents/
 │   │   ├── manager/            # Manager 的 IDENTITY.md / SOUL.md / agent.yaml
 │   │   └── developer/          # Developer 的 IDENTITY.md / SOUL.md / agent.yaml
-│   └── workspace/              # 共享工作空间
+│   └── workspace/              # 共享工作空间（SOUL.md / USER.md / AGENTS.md 等）
 └── doc/                        # 设计与参考文档
     ├── design/                 # 架构设计
     ├── integration/            # 第三方集成指南
@@ -60,9 +102,10 @@ ClawFleet/
 # 1. 克隆项目
 git clone <repo-url> && cd ClawFleet
 
-# 2. 配置环境变量
-cp .env.example .env
-# 编辑 .env，填入 OPENAI_API_KEY 和 OPENCLAW_GATEWAY_TOKEN
+# 2. 为每个 Agent 配置环境变量
+cp .env.example agents/manager/.env
+cp .env.example agents/developer/.env
+# 编辑各自的 .env，填入 OPENAI_API_KEY、OPENCLAW_GATEWAY_TOKEN 和 Slack Token
 
 # 3. 启动 Manager
 docker compose up manager --build -d
@@ -75,6 +118,9 @@ curl -fsS http://localhost:3001/healthz && echo " ✅ healthy"
 
 # 6. 打开 Canvas UI
 open "http://localhost:3001/#token=clawfleet-dev-token-2026"
+
+# 7. 启动 Developer（可选）
+docker compose up developer --build -d
 ```
 
 详细测试步骤请参阅 [TESTING.md](./TESTING.md)。
@@ -104,6 +150,6 @@ open "http://localhost:3001/#token=clawfleet-dev-token-2026"
 
 ---
 
-**最后更新**: 2026年3月12日
+**最后更新**: 2026年3月15日
 
 *学习无止境，流动不停息。让我们一起探索智能体工作流的无限可能！*
